@@ -42,7 +42,7 @@ class MyUser(AbstractUser):
         return f'{self.username}: {self.email}'
 
 
-class Subscriptions(models.Model):
+class Subscription(models.Model):
     """Подписки."""
 
     author = models.ForeignKey(

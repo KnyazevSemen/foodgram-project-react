@@ -1,26 +1,20 @@
-from django.http import HttpResponse
 from django.contrib.auth import get_user_model
-from django.db.models import Q, Sum
+from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
-
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.status import HTTP_401_UNAUTHORIZED
 from rest_framework.decorators import action
-
 from djoser.views import UserViewSet as DjoserUserViewSet
 
 from recipes.models import (
-    Carts,
-    Favorites,
+    Cart,
+    Favorite,
     Ingredient,
     Recipe,
-    Tag,
-    AmountIngredient
+    Tag
 )
-from users.models import Subscriptions
+from users.models import Subscription
 
 from api.permissions import (
     BlockedPermission,
@@ -37,21 +31,8 @@ from api.serializers import (
     ShortRecipeSerializer,
     SubscribeSerializer
 )
-
-
-ACTION_METHODS = (
-    'GET',
-    'POST',
-    'DELETE'
-)
-
-GET_POST_METHODS = (
-    'GET',
-    'POST'
-)
-DEL_METHODS = (
-    'DELETE',
-)
+from api.services import service_download_shopping_cart
+from foodgram.settings import ACTION_METHODS
 
 User = get_user_model()
 
@@ -69,18 +50,14 @@ class UserViewSet(DjoserUserViewSet, AddedDeleteViewMixin):
         permission_classes=(IsAuthenticated,)
     )
     def subscribe(self, request, id):
-
-        return self._add_del_obj(id, Subscriptions, Q(author__id=id))
+        return self._add_del_obj(id, Subscription, Q(author__id=id))
 
     @action(
         methods=('get',),
-        detail=False
+        detail=False,
+        permission_classes=(IsAuthenticated,)
     )
     def subscriptions(self, request):
-
-        if self.request.user.is_anonymous:
-            return Response(status=HTTP_401_UNAUTHORIZED)
-
         pages = self.paginate_queryset(
             User.objects.filter(subscribers__user=self.request.user)
         )
@@ -125,8 +102,7 @@ class RecipeViewSet(ModelViewSet, AddedDeleteViewMixin):
         permission_classes=(IsAuthenticated,)
     )
     def favorite(self, request, pk):
-
-        return self._add_del_obj(pk, Favorites, Q(recipe__id=pk))
+        return self._add_del_obj(pk, Favorite, Q(recipe__id=pk))
 
     @action(
         methods=ACTION_METHODS,
@@ -134,8 +110,7 @@ class RecipeViewSet(ModelViewSet, AddedDeleteViewMixin):
         permission_classes=(IsAuthenticated,)
     )
     def shopping_cart(self, request, pk):
-
-        return self._add_del_obj(pk, Carts, Q(recipe__id=pk))
+        return self._add_del_obj(pk, Cart, Q(recipe__id=pk))
 
     @action(
         methods=('get',),
@@ -143,27 +118,4 @@ class RecipeViewSet(ModelViewSet, AddedDeleteViewMixin):
         permission_classes=(IsAuthenticated,)
     )
     def download_shopping_cart(self, request, **kwargs):
-        ingredients = (
-            AmountIngredient.objects
-            .filter(recipe__in_carts__user=request.user)
-            .values('ingredients')
-            .annotate(total_amount=Sum('amount'))
-            .values_list('ingredients__name', 'total_amount',
-                         'ingredients__measurement_unit')
-        )
-
-        file_list = []
-        filename = 'shopping_list.txt'
-
-        [file_list.append(
-            '{} - {} {}.'.format(*ingredient))
-            for ingredient in ingredients]
-
-        file = HttpResponse(
-            'Cписок покупок:\n' + '\n'.join(file_list),
-            content_type='text/plain'
-        )
-
-        file['Content-Disposition'] = (f'attachment; filename={filename}')
-
-        return file
+        return service_download_shopping_cart(request)

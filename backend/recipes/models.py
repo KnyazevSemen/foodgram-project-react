@@ -7,20 +7,20 @@ User = get_user_model()
 
 
 class Ingredient(models.Model):
-    """Ингридиенты для рецепта."""
+    """Ингредиенты для рецепта."""
 
     name = models.CharField(
-        verbose_name='Ингридиент',
+        verbose_name='Ингредиент',
         max_length=250,
     )
     measurement_unit = models.CharField(
         verbose_name='Единицы измерения',
-        max_length=100,
+        max_length=10,
     )
 
     class Meta:
-        verbose_name = 'Ингридиент'
-        verbose_name_plural = 'Ингридиенты'
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
         ordering = ('name', )
         constraints = (
             models.UniqueConstraint(
@@ -30,7 +30,7 @@ class Ingredient(models.Model):
         )
 
     def __str__(self) -> str:
-        return f'{self.name}'
+        return self.name
 
 
 class Tag(models.Model):
@@ -66,7 +66,7 @@ class Tag(models.Model):
         ordering = ('name',)
 
     def __str__(self) -> str:
-        return f'{self.name}'
+        return self.name
 
 
 class Recipe(models.Model):
@@ -123,7 +123,7 @@ class Recipe(models.Model):
         )
 
     def __str__(self) -> str:
-        return f'{self.name}'
+        return self.name
 
 
 class AmountIngredient(models.Model):
@@ -158,10 +158,10 @@ class AmountIngredient(models.Model):
         )
 
     def __str__(self) -> str:
-        return f'{self.amount}'
+        return self.amount
 
 
-class Favorites(models.Model):
+class Favorite(models.Model):
     """Избранные рецепты."""
 
     recipe = models.ForeignKey(
@@ -193,10 +193,10 @@ class Favorites(models.Model):
         )
 
     def __str__(self) -> str:
-        return f'{self.user}'
+        return self.user
 
 
-class Carts(models.Model):
+class Cart(models.Model):
     """Корзина"""
 
     recipe = models.ForeignKey(
@@ -228,4 +228,4 @@ class Carts(models.Model):
         )
 
     def __str__(self) -> str:
-        return f'{self.user}'
+        return self.user

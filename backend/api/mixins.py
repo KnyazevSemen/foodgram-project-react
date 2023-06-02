@@ -1,18 +1,14 @@
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-
 from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
-from rest_framework.status import (HTTP_201_CREATED, HTTP_204_NO_CONTENT,
-                                   HTTP_400_BAD_REQUEST)
-
-
-GET_POST_METHODS = (
-    'GET',
-    'POST'
+from rest_framework.status import (
+    HTTP_201_CREATED, HTTP_204_NO_CONTENT,
+    HTTP_400_BAD_REQUEST
 )
-DEL_METHODS = (
-    'DELETE',
+from foodgram.settings import (
+    GET_POST_METHODS,
+    DEL_METHODS,
 )
 
 
@@ -20,11 +16,10 @@ class AddedDeleteViewMixin:
 
     additional_serializer: ModelSerializer
 
-    def _add_del_obj(self, obj_id, m2m_model, q):
-
+    def _add_del_obj(self, obj_id, m2m_model, query):
         obj = get_object_or_404(self.queryset, id=obj_id)
         serializer = self.additional_serializer(obj)
-        m2m_obj = m2m_model.objects.filter(q & Q(user=self.request.user))
+        m2m_obj = m2m_model.objects.filter(query & Q(user=self.request.user))
 
         if (self.request.method in GET_POST_METHODS) and not m2m_obj:
             m2m_model(None, obj.id, self.request.user.id).save()

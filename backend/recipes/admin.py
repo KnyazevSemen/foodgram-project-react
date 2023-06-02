@@ -7,8 +7,8 @@ from recipes.models import (
     Recipe,
     Tag,
     AmountIngredient,
-    Favorites,
-    Carts
+    Favorite,
+    Cart
 )
 
 
@@ -87,7 +87,7 @@ class TagAdmin(admin.ModelAdmin):
         )
 
 
-@admin.register(Favorites)
+@admin.register(Favorite)
 class FavoriteAdmin(admin.ModelAdmin):
     list_display = (
         'user', 'recipe', 'date_added'
@@ -97,7 +97,7 @@ class FavoriteAdmin(admin.ModelAdmin):
     )
 
 
-@admin.register(Carts)
+@admin.register(Cart)
 class CardAdmin(admin.ModelAdmin):
     list_display = (
         'user', 'recipe', 'date_added'

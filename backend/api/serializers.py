@@ -1,9 +1,8 @@
 from drf_extra_fields.fields import Base64ImageField
-
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
 from django.db import transaction
 from django.db.models import F
-
 from rest_framework import serializers
 
 from recipes.models import Ingredient, Recipe, Tag, AmountIngredient
@@ -31,7 +30,6 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = 'is_subscribed',
 
     def get_is_subscribed(self, obj: User):
-
         user = self.context.get('request').user
 
         if user.is_anonymous or (user == obj):
@@ -40,7 +38,6 @@ class UserSerializer(serializers.ModelSerializer):
         return user.subscriptions.filter(author=obj).exists()
 
     def create(self, validated_data):
-
         user = User(
             email=validated_data['email'],
             username=validated_data['username'],
@@ -82,11 +79,9 @@ class SubscribeSerializer(UserSerializer):
         read_only_fields = '__all__',
 
     def get_is_subscribed(*args):
-
         return True
 
     def get_recipes_count(self, obj):
-
         return obj.recipes.count()
 
 
@@ -147,14 +142,12 @@ class RecipeSerializer(serializers.ModelSerializer):
         )
 
     def get_ingredients(self, recipe):
-
         ingredients = recipe.ingredients.values(
             'id', 'name', 'measurement_unit', amount=F('recipe__amount')
         )
         return ingredients
 
     def get_is_favorited(self, recipe):
-
         user = self.context.get('view').request.user
 
         if user.is_anonymous:
@@ -163,7 +156,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         return user.favorites.filter(recipe=recipe).exists()
 
     def get_is_in_shopping_cart(self, recipe):
-
         user = self.context.get('view').request.user
 
         if user.is_anonymous:
@@ -172,7 +164,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         return user.carts.filter(recipe=recipe).exists()
 
     def validate(self, data):
-
         for field in ['name', 'text', 'cooking_time']:
             if not data.get(field):
                 raise serializers.ValidationError(
@@ -200,30 +191,28 @@ class RecipeSerializer(serializers.ModelSerializer):
 
         return data
 
-    def set_recipe_ingredients(self, recipe, tags, ingredients):
-
+    @staticmethod
+    def _set_recipe_ingredients(recipe, tags, ingredients):
         recipe.tags.set(tags)
         AmountIngredient.objects.bulk_create(
             [AmountIngredient(
                 recipe=recipe,
-                ingredients=Ingredient.objects.get(pk=ingredient['id']),
+                ingredients=get_object_or_404(Ingredient, pk=ingredient['id']),
                 amount=ingredient['amount']
             ) for ingredient in ingredients]
         )
 
     @transaction.atomic
     def create(self, validated_data):
-
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
         recipe = Recipe.objects.create(**validated_data)
-        self.set_recipe_ingredients(recipe, tags, ingredients)
+        self._set_recipe_ingredients(recipe, tags, ingredients)
 
         return recipe
 
     @transaction.atomic
     def update(self, recipe, validated_data):
-
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
 
@@ -237,7 +226,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
         if ingredients:
             recipe.ingredients.clear()
-            self.set_recipe_ingredients(recipe, tags, ingredients)
+            self._set_recipe_ingredients(recipe, tags, ingredients)
 
         recipe.save()
 

@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv(
     'SECRET_KEY',
-    default='g1ixq2uwl4avfhe8v=d9wft$g6xw0mg28vr8de)+ct44=9'
+    default='g1ixq2uw'
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -209,3 +209,18 @@ LOGGING = {
         },
     },
 }
+
+GET_POST_METHODS = (
+    'GET',
+    'POST'
+)
+DEL_METHODS = (
+    'DELETE',
+)
+ACTION_METHODS = (
+    'GET',
+    'POST',
+    'DELETE'
+)
+
+FILE_NAME = 'shopping_list.txt'
