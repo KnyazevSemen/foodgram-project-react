@@ -15,7 +15,6 @@ from recipes.models import (
     Tag
 )
 from users.models import Subscription
-
 from api.permissions import (
     BlockedPermission,
     AdminOrReadOnly,
@@ -31,8 +30,8 @@ from api.serializers import (
     ShortRecipeSerializer,
     SubscribeSerializer
 )
-from api.services import service_download_shopping_cart
-from foodgram.settings import ACTION_METHODS
+from api.services import download
+from django.conf import settings
 
 User = get_user_model()
 
@@ -45,7 +44,7 @@ class UserViewSet(DjoserUserViewSet, AddedDeleteViewMixin):
     permission_classes = (AllowAny,)
 
     @action(
-        methods=ACTION_METHODS,
+        methods=settings.ACTION_METHODS,
         detail=True,
         permission_classes=(IsAuthenticated,)
     )
@@ -97,7 +96,7 @@ class RecipeViewSet(ModelViewSet, AddedDeleteViewMixin):
     filterset_class = RecipeFilter
 
     @action(
-        methods=ACTION_METHODS,
+        methods=settings.ACTION_METHODS,
         detail=True,
         permission_classes=(IsAuthenticated,)
     )
@@ -105,7 +104,7 @@ class RecipeViewSet(ModelViewSet, AddedDeleteViewMixin):
         return self._add_del_obj(pk, Favorite, Q(recipe__id=pk))
 
     @action(
-        methods=ACTION_METHODS,
+        methods=settings.ACTION_METHODS,
         detail=True,
         permission_classes=(IsAuthenticated,)
     )
@@ -117,5 +116,5 @@ class RecipeViewSet(ModelViewSet, AddedDeleteViewMixin):
         detail=False,
         permission_classes=(IsAuthenticated,)
     )
-    def download_shopping_cart(self, request, **kwargs):
-        return service_download_shopping_cart(request)
+    def download_shopping_cart(self):
+        return download(self.request.user)

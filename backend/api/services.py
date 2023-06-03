@@ -2,13 +2,13 @@ from django.http import HttpResponse
 from django.db.models import Sum
 
 from recipes.models import AmountIngredient
-from foodgram.settings import FILE_NAME
+from django.conf import settings
 
 
-def service_download_shopping_cart(request, **kwargs):
+def download(user):
     ingredients = (
         AmountIngredient.objects
-        .filter(recipe__in_carts__user=request.user)
+        .filter(recipe__in_carts__user=user)
         .values('ingredients')
         .annotate(total_amount=Sum('amount'))
         .values_list('ingredients__name', 'total_amount',
@@ -23,6 +23,8 @@ def service_download_shopping_cart(request, **kwargs):
         'Cписок покупок:\n' + '\n'.join(file_list),
         content_type='text/plain'
     )
-    file['Content-Disposition'] = (f'attachment; filename={FILE_NAME}')
+    file['Content-Disposition'] = (
+        f'attachment; filename={settings.FILE_NAME}'
+    )
 
     return file
