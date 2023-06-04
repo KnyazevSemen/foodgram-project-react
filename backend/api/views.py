@@ -6,6 +6,7 @@ from rest_framework.filters import SearchFilter
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import action
 from djoser.views import UserViewSet as DjoserUserViewSet
+from django.conf import settings
 
 from recipes.models import (
     Cart,
@@ -30,8 +31,7 @@ from api.serializers import (
     ShortRecipeSerializer,
     SubscribeSerializer
 )
-from api.services import download
-from django.conf import settings
+from api.services import download_shopping_list
 
 User = get_user_model()
 
@@ -116,5 +116,5 @@ class RecipeViewSet(ModelViewSet, AddedDeleteViewMixin):
         detail=False,
         permission_classes=(IsAuthenticated,)
     )
-    def download_shopping_cart(self):
-        return download(self.request.user)
+    def download_shopping_cart(self, request):
+        return download_shopping_list(request.user)

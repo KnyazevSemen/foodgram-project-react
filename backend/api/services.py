@@ -1,11 +1,11 @@
 from django.http import HttpResponse
 from django.db.models import Sum
-
-from recipes.models import AmountIngredient
 from django.conf import settings
 
+from recipes.models import AmountIngredient
 
-def download(user):
+
+def download_shopping_list(user):
     ingredients = (
         AmountIngredient.objects
         .filter(recipe__in_carts__user=user)
