@@ -3,9 +3,8 @@ services:
 
   frontend:
     container_name: foodgram-front
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+    image: sknyazev91/foodgram_frontend:latest
+    restart: always
     volumes:
       - ../frontend/:/app/result_build/
 
@@ -20,9 +19,7 @@ services:
 
   backend:
     container_name: foodgram-app
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
+    image: sknyazev91/foodgram_backend:latest
     restart: always
     volumes:
       - static_dir:/app/static/

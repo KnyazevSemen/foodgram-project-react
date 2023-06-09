@@ -183,6 +183,12 @@ class RecipeSerializer(serializers.ModelSerializer):
                 'Нужно указать минимум 1 ингредиент.'
             )
 
+        for ingredient in ingredients:
+            if int(ingredient['amount']) <= 0:
+                raise serializers.ValidationError(
+                    'Вы указали отрицательное количество ингредиентов или 0.'
+                )
+
         data.update({
             'tags': tags,
             'ingredients': ingredients,

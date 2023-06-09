@@ -29,7 +29,7 @@ class Ingredient(models.Model):
             ),
         )
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.name
 
 
@@ -65,7 +65,7 @@ class Tag(models.Model):
         verbose_name_plural = 'Тэги'
         ordering = ('name',)
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.name
 
 
@@ -122,8 +122,8 @@ class Recipe(models.Model):
             ),
         )
 
-    def __str__(self) -> str:
-        return self.name
+    def __str__(self):
+        return f'{self.name}. {self.author.username}'
 
 
 class AmountIngredient(models.Model):
@@ -142,8 +142,7 @@ class AmountIngredient(models.Model):
         on_delete=models.CASCADE,
     )
     amount = models.PositiveSmallIntegerField(
-        verbose_name='Количество',
-        default=0,
+        verbose_name='Количество'
     )
 
     class Meta:
@@ -157,8 +156,8 @@ class AmountIngredient(models.Model):
             ),
         )
 
-    def __str__(self) -> str:
-        return self.amount
+    def __str__(self):
+        return f'{self.amount} {self.ingredients}'
 
 
 class Favorite(models.Model):
@@ -192,8 +191,8 @@ class Favorite(models.Model):
             ),
         )
 
-    def __str__(self) -> str:
-        return self.user
+    def __str__(self):
+        return f'{self.user} -> {self.recipe}'
 
 
 class Cart(models.Model):
@@ -227,5 +226,5 @@ class Cart(models.Model):
             ),
         )
 
-    def __str__(self) -> str:
-        return self.user
+    def __str__(self):
+        return f'{self.user} -> {self.recipe}'
